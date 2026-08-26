@@ -1,0 +1,20 @@
+# Sentinel//Lab — single-host compose stack (run from repo root)
+#   docker compose -f deploy/docker-compose.yaml up -d --build
+services:
+  console:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: sentinel-lab:0.1.0
+    container_name: sentinel-lab
+    ports:
+      - "8443:8080"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    mem_limit: 128m
+    cpus: 0.5
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
