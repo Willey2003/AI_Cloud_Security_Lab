@@ -5,6 +5,7 @@ import IntakePanel from "./components/IntakePanel";
 import AnalysisPanel, { type View } from "./components/AnalysisPanel";
 import AttackMatrix from "./components/AttackMatrix";
 import Roadmap from "./components/Roadmap";
+import DeployGuide from "./components/DeployGuide";
 import Reveal from "./components/Reveal";
 import { IconShield } from "./components/icons";
 import { SAMPLES } from "./data/samples";
@@ -297,6 +298,8 @@ export default function App() {
         </main>
 
         <Roadmap />
+
+        <DeployGuide />
 
         {/* footer */}
         <footer className="mx-auto mt-14 max-w-[1500px] border-t border-edge/60 px-4 py-8 sm:px-6">
