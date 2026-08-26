@@ -203,6 +203,41 @@ const ARTIFACTS: { path: string; markers: [string, RegExp][] }[] = [
       ["readiness probe defined", /readinessProbe/],
     ],
   },
+  {
+    path: "scripts/publish.sh",
+    markers: [
+      ["creates the remote via gh", /gh repo create/],
+      ["private-first default", /--private/],
+      ["refuses to push staged secrets", /hygiene violation/],
+    ],
+  },
+  {
+    path: "governance/ci.yaml",
+    markers: [
+      ["secret-scan job", /secrets:/],
+      ["build + typecheck job", /build:/],
+      ["trivy image job", /image:/],
+      ["iac checkov job", /iac:/],
+    ],
+  },
+  {
+    path: "governance/dependabot.yml",
+    markers: [
+      ["npm ecosystem covered", /package-ecosystem: "npm"/],
+      ["github-actions ecosystem covered", /github-actions/],
+    ],
+  },
+  {
+    path: "governance/SECURITY.md",
+    markers: [
+      ["private advisory reporting path", /private security advisory/],
+      ["explicit out-of-scope statement", /Out of scope/],
+    ],
+  },
+  {
+    path: "governance/LICENSE",
+    markers: [["MIT license present", /MIT License/]],
+  },
 ];
 
 async function runArtifacts(): Promise<Check[]> {
@@ -235,7 +270,7 @@ const GAPS: { item: string; status: "MISSING" | "PARTIAL" | "SIMULATED" | "PLANN
   { item: "TLS termination", status: "MISSING", note: "Plain HTTP today; add an HTTPS proxy or cert-manager before exposing." },
   { item: "Durable storage", status: "PARTIAL", note: "Triage state in localStorage; pipeline steps 2–3 swap in SQLite/Postgres." },
   { item: "Live alert ingestion", status: "SIMULATED", note: "Samples + paste-in only; GuardDuty/Wazuh connectors are steps 3–4." },
-  { item: "CI security gates", status: "PLANNED", note: "Trivy / Checkov / secret scanning land at pipeline step 8." },
+  { item: "CI security gates", status: "PARTIAL", note: "TruffleHog / Trivy / Checkov + Dependabot staged in the repo — arms on first push to GitHub." },
   { item: "Image signing & SBOM", status: "MISSING", note: "No cosign signature or SBOM attestation on sentinel-lab:0.1.0." },
   { item: "Runtime observability", status: "MISSING", note: "No metrics or trace export from the container yet." },
   { item: "Network segmentation", status: "MISSING", note: "No default-deny NetworkPolicy in the k8s manifest yet." },
@@ -290,7 +325,7 @@ function tally(checks: Check[]) {
 const EMPTY_GROUPS: Group[] = [
   { id: "contract", label: "SCHEMA CONTRACT", blurb: "the exact 9-key JSON contract, tested against every sample payload", checks: null },
   { id: "posture", label: "DEFENSIVE POSTURE", blurb: "lint of every generated playbook step for destructive automation", checks: null },
-  { id: "artifacts", label: "DEPLOY ARTIFACTS", blurb: "live fetch of deploy/* — hardening markers must be present", checks: null },
+  { id: "artifacts", label: "DEPLOY + GOVERNANCE", blurb: "live fetch of deploy/*, scripts/* and governance/* — hardening & repo-hygiene markers must be present", checks: null },
 ];
 
 export default function ValidationPanel() {

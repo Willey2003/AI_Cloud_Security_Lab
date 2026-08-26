@@ -70,9 +70,22 @@ Artifacts: `deploy/Dockerfile` (multi-stage, non-root, unprivileged port, health
 (read-only root FS, tmpfs scratch, memory cap, no-new-privileges), `deploy/k8s/sentinel.yaml`
 (runAsNonRoot, dropped capabilities, probes, requests/limits).
 
-## CI gates
+## Publish to GitHub — one command
 
-`.github/workflows/ci.yaml` runs on every push/PR:
+```bash
+gh auth login
+bash scripts/publish.sh sentinel-lab        # private (default)
+# flags: --public · --org <name>
+```
+
+The publisher reviews staged files with you, **refuses to push** if a `.env`, key, or build
+output is staged, then runs `gh repo create … --private --source=. --remote=origin --push`
+and confirms the CI jobs armed. Manual path: `git init -b main && git add -A && git commit`
+then the same `gh repo create` line.
+
+## CI gates & repo governance
+
+`.github/workflows/ci.yaml` runs on every push/PR (arms on first push):
 
 1. **secrets** — TruffleHog scan of full history
 2. **build** — `npm ci` → `typecheck` → `build`, dist uploaded as artifact
@@ -80,6 +93,10 @@ Artifacts: `deploy/Dockerfile` (multi-stage, non-root, unprivileged port, health
 4. **iac** — Checkov + Trivy config scans over `deploy/`
 
 Findings must be fixed or explicitly documented — the gates fail by design.
+
+Governance layer: `.github/dependabot.yml` (weekly npm / actions / docker updates),
+`SECURITY.md` (private-advisory reporting), `LICENSE` (MIT), issue + PR templates with a
+contract-preservation checklist.
 
 ## Pipeline status (recommended learning sequence)
 

@@ -4,9 +4,23 @@ import { Term } from "./DeployGuide";
 const STAGED_FILES = [
   { file: "README.md", note: "overview · contract · deploy · 6 ADRs — pipeline step 10" },
   { file: ".github/workflows/ci.yaml", note: "TruffleHog · build · Trivy · Checkov — step 8" },
+  { file: ".github/dependabot.yml", note: "weekly updates: npm · actions · docker base images" },
+  { file: "SECURITY.md", note: "private-advisory reporting path + posture summary" },
+  { file: "LICENSE", note: "MIT" },
+  { file: "scripts/publish.sh", note: "one-command publisher — refuses to push staged secrets" },
   { file: ".gitignore", note: "keeps node_modules, dist, .env out of history" },
   { file: ".dockerignore", note: "keeps the image build context lean" },
 ];
+
+const PUBLISH_SH = `# init + hygiene review (aborts on staged .env/keys/build output)
+git init -b main && git status --porcelain   # you confirm before push
+git add -A && git commit -m "sentinel-lab v0.1 …"
+
+# create remote + push — private-first
+gh repo create "$REPO" --private --source=. --remote=origin --push
+
+# confirm the four CI jobs armed
+gh run list --limit 4`;
 
 const CI_YAML = `name: ci
 on: [push, pull_request]
@@ -140,9 +154,9 @@ export default function PublishGuide() {
               <span className="font-semibold text-signal-300">Sandbox limit, stated plainly:</span>{" "}
               this environment has no git remote and no credentials, so the push itself cannot
               execute here — claiming otherwise would invent a fact. The repo is{" "}
-              <em className="not-italic text-fog-300">fully staged</em> (README + ADRs, CI gates,
-              hygiene files, deploy artifacts). The four steps below reproduce the exact publish
-              from your machine in under two minutes.
+              <em className="not-italic text-fog-300">fully staged</em> — README + ADRs, CI gates,
+              Dependabot, security policy, license, and a publisher script that creates the GitHub
+              repo and pushes in one command. Step 01 below is that command.
             </p>
           </div>
 
@@ -151,48 +165,50 @@ export default function PublishGuide() {
               <div className="mb-3 flex items-baseline gap-3">
                 <span className="font-display text-2xl font-bold tabular-nums text-pulse-400/80">01</span>
                 <h3 className="font-display text-[14px] font-semibold tracking-wide text-fog-100">
-                  STAGE &amp; COMMIT
+                  ONE COMMAND — <span className="text-pulse-300">scripts/publish.sh</span>
                 </h3>
               </div>
               <p className="mb-3 text-[11.5px] leading-relaxed text-fog-500">
-                Everything the repo needs is already on disk — hygiene files included. The review
-                step is the last line of defense against committing a secret.
+                The staged publisher does init → hygiene review → commit →{" "}
+                <span className="font-mono text-pulse-300">gh repo create</span> → push → CI
+                confirmation. It <span className="text-signal-300">refuses to push</span> if a{" "}
+                <span className="font-mono">.env</span>, key, or build output is staged. Flags:{" "}
+                <span className="text-signal-300">--public</span>,{" "}
+                <span className="text-signal-300">--org &lt;name&gt;</span>; private is the default.
               </p>
-              <Term
-                id="pub-1"
-                label="shell"
-                code={`$ git init -b main
-$ git add -A
-$ git status          # confirm: no .env, no *.key, no node_modules/, no dist/
-$ git commit -m "sentinel-lab: defensive triage console, deploy artifacts, CI gates"`}
-              />
+              <div className="space-y-3">
+                <Term
+                  id="pub-1a"
+                  label="shell"
+                  code={`$ gh auth login            # once\n$ bash scripts/publish.sh sentinel-lab\n# reviews staged files with you, then creates + pushes the repo`}
+                />
+                <Term id="pub-1b" label="scripts/publish.sh · flow" code={PUBLISH_SH} />
+              </div>
             </div>
 
             <div className="group border border-edge/60 bg-ink-900/40 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-pulse-400/40 hover:shadow-[0_14px_36px_-18px_rgba(57,215,230,0.35)]">
               <div className="mb-3 flex items-baseline gap-3">
                 <span className="font-display text-2xl font-bold tabular-nums text-pulse-400/80">02</span>
                 <h3 className="font-display text-[14px] font-semibold tracking-wide text-fog-100">
-                  CREATE REMOTE &amp; PUSH
+                  MANUAL PATH — STAGE &amp; PUSH
                 </h3>
               </div>
               <p className="mb-3 text-[11.5px] leading-relaxed text-fog-500">
-                One <span className="font-mono text-pulse-300">gh</span> command creates the repo
-                and pushes. <span className="text-signal-300">Private-first</span> — lab data stays
-                off public search until you decide otherwise.
+                Prefer hands on the wheel? Same outcome in five commands. The{" "}
+                <span className="font-mono">git status</span> review is the last line of defense
+                against committing a secret — <span className="text-signal-300">private-first</span>{" "}
+                keeps lab data off public search.
               </p>
               <div className="space-y-3">
                 <Term
                   id="pub-2a"
                   label="shell"
-                  code={`$ gh auth login
-$ gh repo create sentinel-lab --private --source=. --remote=origin --push
-# ✓ created github.com/YOUR-USER/sentinel-lab and pushed main`}
+                  code={`$ git init -b main\n$ git add -A\n$ git status          # confirm: no .env, no *.key, no node_modules/, no dist/\n$ git commit -m "sentinel-lab: defensive triage console, deploy artifacts, CI gates"`}
                 />
                 <Term
                   id="pub-2b"
-                  label="shell · without gh"
-                  code={`$ git remote add origin git@github.com:YOUR-USER/sentinel-lab.git
-$ git push -u origin main`}
+                  label="shell · create + push"
+                  code={`$ gh repo create sentinel-lab --private --source=. --remote=origin --push\n# without gh: git remote add origin git@github.com:YOU/sentinel-lab.git && git push -u origin main`}
                 />
               </div>
             </div>
