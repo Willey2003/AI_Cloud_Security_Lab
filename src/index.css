@@ -1,1 +1,228 @@
 @import "tailwindcss";
+
+@theme {
+  --font-display: "Chakra Petch", "IBM Plex Sans", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink-950: #070d18;
+  --color-ink-900: #0a1220;
+  --color-ink-800: #0e1a2e;
+  --color-ink-700: #13233d;
+  --color-ink-600: #1b3155;
+  --color-edge: #22385c;
+
+  --color-fog-100: #e8effa;
+  --color-fog-300: #b9c8e4;
+  --color-fog-500: #8ca0c3;
+  --color-fog-700: #5f7396;
+
+  --color-pulse-300: #7ce7f2;
+  --color-pulse-400: #39d7e6;
+  --color-pulse-600: #1793a6;
+
+  --color-signal-300: #ffc65c;
+  --color-signal-400: #ffb020;
+
+  --color-alert-300: #ff7a88;
+  --color-alert-400: #ff5163;
+
+  --color-ok-400: #35e0a1;
+
+  --color-sev-critical: #ff5163;
+  --color-sev-high: #ff8a2a;
+  --color-sev-medium: #ffd166;
+  --color-sev-low: #6fd7ff;
+  --color-sev-info: #8ca0c3;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-fog-100);
+  background:
+    radial-gradient(1100px 620px at 88% -12%, rgba(255, 176, 32, 0.075), transparent 60%),
+    radial-gradient(950px 680px at -8% 18%, rgba(57, 215, 230, 0.085), transparent 55%),
+    radial-gradient(760px 540px at 55% 118%, rgba(255, 81, 99, 0.05), transparent 60%),
+    var(--color-ink-950);
+  min-height: 100vh;
+}
+
+/* ---- ambient layers ---- */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(57, 215, 230, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 215, 230, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, black 25%, transparent 78%);
+}
+
+.scanline {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: -140px;
+  height: 140px;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(57, 215, 230, 0.055) 70%, rgba(57, 215, 230, 0.12));
+  animation: scanY 13s linear infinite;
+}
+
+@keyframes scanY {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(calc(100vh + 280px)); }
+}
+
+/* ---- panel with console corner brackets ---- */
+.panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(19, 35, 61, 0.72), rgba(10, 18, 32, 0.88));
+  border: 1px solid rgba(64, 92, 145, 0.28);
+  box-shadow: 0 18px 44px -26px rgba(0, 0, 0, 0.75);
+}
+.panel::before,
+.panel::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+.panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--color-pulse-400);
+  border-left: 2px solid var(--color-pulse-400);
+  opacity: 0.75;
+}
+.panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--color-signal-400);
+  border-right: 2px solid var(--color-signal-400);
+  opacity: 0.6;
+}
+
+/* ---- living bits ---- */
+.led {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  animation: ledPulse 2.4s ease-in-out infinite;
+}
+@keyframes ledPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50% { opacity: 0.55; box-shadow: 0 0 8px 1px currentColor; }
+}
+
+.radar-sweep {
+  transform-origin: 24px 24px;
+  animation: radarSpin 3.4s linear infinite;
+}
+@keyframes radarSpin {
+  to { transform: rotate(360deg); }
+}
+
+.blip {
+  animation: blipFade 3.4s ease-out infinite;
+}
+@keyframes blipFade {
+  0%, 12% { opacity: 1; }
+  55% { opacity: 0.12; }
+  100% { opacity: 1; }
+}
+
+.caret::after {
+  content: "▍";
+  margin-left: 2px;
+  color: var(--color-pulse-400);
+  animation: caretBlink 1s steps(1) infinite;
+}
+@keyframes caretBlink {
+  50% { opacity: 0; }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: tickerMove 48s linear infinite;
+}
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes tickerMove {
+  to { transform: translateX(-50%); }
+}
+
+/* scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* roadmap dashed connector */
+.dashline {
+  background-image: linear-gradient(90deg, rgba(57, 215, 230, 0.5) 55%, transparent 45%);
+  background-size: 14px 2px;
+  background-repeat: repeat-x;
+  animation: dashMove 1.4s linear infinite;
+}
+@keyframes dashMove {
+  to { background-position: 14px 0; }
+}
+
+/* severity gauge */
+.gauge-arc {
+  transition: stroke-dashoffset 1.1s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.4s ease;
+}
+
+/* bars */
+.bar-anim {
+  transition: height 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* checklist row */
+.step-row {
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+.step-row:hover {
+  transform: translateX(3px);
+}
+
+/* scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #22385c transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #22385c; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+::selection {
+  background: rgba(255, 176, 32, 0.35);
+  color: #fff7e8;
+}
+
+textarea:focus, button:focus-visible, [tabindex]:focus-visible {
+  outline: 1px solid var(--color-pulse-400);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanline, .ticker-track, .dashline, .radar-sweep, .led, .blip { animation: none !important; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
