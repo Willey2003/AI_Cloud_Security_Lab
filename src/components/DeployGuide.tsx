@@ -352,6 +352,51 @@ function FlowStrip() {
   );
 }
 
+function flatten(tab: TabId): string {
+  const src = tab === "docker" ? DOCKER_STEPS : K8S_STEPS;
+  const parts: string[] = [];
+  for (const step of src) {
+    parts.push(`# ---- ${step.title} ----`);
+    for (const b of step.blocks) {
+      if (b.label !== "shell") continue;
+      parts.push(
+        b.code
+          .split("\n")
+          .map((l) => (l.trim().startsWith("$ ") ? l.replace(/^\s*\$ /, "") : l))
+          .join("\n"),
+      );
+    }
+    parts.push("");
+  }
+  return parts.join("\n").trim() + "\n";
+}
+
+function CopySequence({ tab }: { tab: TabId }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(flatten(tab));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
+  return (
+    <button
+      onClick={copy}
+      className={`flex shrink-0 items-center gap-2 border px-3.5 py-1.5 font-display text-[10px] font-bold tracking-[0.2em] transition-all ${
+        copied
+          ? "border-ok-400/70 bg-ok-400/10 text-ok-400"
+          : "border-signal-400/60 bg-signal-400/10 text-signal-300 hover:bg-signal-400/20"
+      }`}
+    >
+      <IconCopy size={12} />
+      {copied ? "SEQUENCE COPIED ✓" : "COPY FULL SEQUENCE"}
+    </button>
+  );
+}
+
 export default function DeployGuide() {
   const [tab, setTab] = useState<TabId>("docker");
   const steps = tab === "docker" ? DOCKER_STEPS : K8S_STEPS;
@@ -402,6 +447,15 @@ export default function DeployGuide() {
                 {label}
               </button>
             ))}
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="font-mono text-[10px] leading-relaxed tracking-wider text-fog-700">
+              {tab === "docker"
+                ? "full flow: build → run → verify (compose alternative included)"
+                : "full flow: cluster → load image → apply → verify → harden"}
+            </p>
+            <CopySequence tab={tab} />
           </div>
 
           <div key={tab} className="tabfade mt-6 grid gap-4 lg:grid-cols-2">
