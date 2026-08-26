@@ -6,6 +6,7 @@ import AnalysisPanel, { type View } from "./components/AnalysisPanel";
 import AttackMatrix from "./components/AttackMatrix";
 import Roadmap from "./components/Roadmap";
 import DeployGuide from "./components/DeployGuide";
+import PublishGuide from "./components/PublishGuide";
 import ValidationPanel from "./components/ValidationPanel";
 import Reveal from "./components/Reveal";
 import { IconShield } from "./components/icons";
@@ -301,6 +302,8 @@ export default function App() {
         <Roadmap />
 
         <DeployGuide />
+
+        <PublishGuide />
 
         <ValidationPanel />
 

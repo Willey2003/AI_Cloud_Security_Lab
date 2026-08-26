@@ -248,7 +248,7 @@ function renderLine(line: string, i: number) {
   );
 }
 
-function Term({ label, code, id }: { label: string; code: string; id: string }) {
+export function Term({ label, code, id }: { label: string; code: string; id: string }) {
   const [copied, setCopied] = useState(false);
   const isShell = label === "shell";
 

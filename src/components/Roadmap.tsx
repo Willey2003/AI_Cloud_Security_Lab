@@ -68,8 +68,8 @@ const STEPS: { icon: typeof IconTerminal; title: string; note: string; status: S
   {
     icon: IconGit,
     title: "CI: secret scanning · Trivy · Checkov · tests",
-    note: "GitHub Actions gate every change: no secrets, no vulnerable images, no misconfigured IaC.",
-    status: "PLANNED",
+    note: "Workflow shipped at .github/workflows/ci.yaml — four gates arm on the first push.",
+    status: "IN PROGRESS",
   },
   {
     icon: IconLink,
@@ -80,8 +80,8 @@ const STEPS: { icon: typeof IconTerminal; title: string; note: string; status: S
   {
     icon: IconDoc,
     title: "Document every design decision",
-    note: "ADR-style notes in the repo: why deterministic-first, why read-only ingest, why no auto-destruction.",
-    status: "ONGOING",
+    note: "README now carries six ADRs — deterministic-first, contract-boundary, evidence-first, read-only ingest, static console, local-cluster posture.",
+    status: "SHIPPED",
   },
 ];
 
@@ -99,7 +99,7 @@ export default function Roadmap() {
             </h2>
           </div>
           <div className="flex items-center gap-4">
-            {(["SHIPPED", "LIVE", "NEXT", "PLANNED"] as Status[]).map((s) => (
+            {(["SHIPPED", "LIVE", "NEXT", "IN PROGRESS", "PLANNED"] as Status[]).map((s) => (
               <span key={s} className="flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-fog-500">
                 <span className="h-2 w-2" style={{ background: STATUS_STYLE[s].color }} />
                 {s}

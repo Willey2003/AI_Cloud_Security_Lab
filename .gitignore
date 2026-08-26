@@ -1,5 +1,26 @@
+# dependencies
 node_modules/
-.next/
+
+# build output
 dist/
-build/
+*.tsbuildinfo
+
+# environment & secrets — never commit
+.env
+.env.*
+*.pem
+*.key
+
+# logs & caches
 *.log
+npm-debug.log*
+.vite/
+coverage/
+
+# editors & OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.next/
+build/
