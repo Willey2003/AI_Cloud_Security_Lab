@@ -1,6 +1,6 @@
 # Sentinel//Lab console — hardened static build
 # Build:  docker build -f deploy/Dockerfile -t sentinel-lab:0.1.0 .
-# Run:    docker run -d -p 8443:8080 --read-only --tmpfs /var/cache/nginx --tmpfs /var/run sentinel-lab:0.1.0
+# Run:    docker run -d -p 8443:8080 --read-only --tmpfs /var/cache/nginx:mode=1777 --tmpfs /var/run:mode=1777 --tmpfs /tmp:mode=1777 sentinel-lab:0.1.0
 
 # ---- Stage 1: build the static console ----
 FROM node:20-alpine AS build
@@ -12,12 +12,18 @@ RUN npm run build
 
 # ---- Stage 2: serve static assets from locked-down nginx ----
 FROM nginx:1.27-alpine
+
+# Install wget for healthcheck (needed in alpine)
+RUN apk add --no-cache wget
+
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /src/dist /usr/share/nginx/html
 
-# Non-root user; writable paths supplied as tmpfs/emptyDir at runtime
-RUN addgroup -S lab && adduser -S lab -G lab \
- && chown -R lab:lab /usr/share/nginx/html /var/cache/nginx /var/run \
+# Create necessary directories and set permissions before switching to non-root
+RUN mkdir -p /var/cache/nginx /var/run /var/log/nginx /tmp \
+ && addgroup -S lab && adduser -S lab -G lab \
+ && chown -R lab:lab /usr/share/nginx/html /var/cache/nginx /var/run /var/log/nginx /tmp \
+ && chmod -R 755 /var/cache/nginx /var/run /var/log/nginx /tmp \
  && rm -rf /etc/nginx/conf.d/default.conf.bak /usr/share/nginx/html/*.md
 
 USER lab
